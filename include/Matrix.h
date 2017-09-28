@@ -138,7 +138,7 @@ template<class T>
 void Matrix<T>::releaseData()
 {
 	if(pData!=NULL)
-		delete pData;
+		delete[] pData;
 	pData=NULL;
 	nRow=nCol=0;
 }
@@ -530,7 +530,7 @@ template<class T>
 void Matrix<T>::readMatrix(const mxArray* prhs)
 {
 	if(pData!=NULL)
-		delete pData;
+		delete[] pData;
 	int nElements = mxGetNumberOfDimensions(prhs);
 	if(nElements>2)
 		mexErrMsgTxt("A matrix is expected to be loaded!");
