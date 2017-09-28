@@ -63,7 +63,7 @@ public:
 	double sum() const
 	{
 		double total = 0;
-		for(int i = 0;i<nCol*nRom;i++)
+		for(int i = 0;i<nCol*nRow;i++)
 			total += pData[i];
 		return total;
 	}
@@ -80,8 +80,11 @@ public:
 	Matrix& operator*=(const Matrix<T>& matrix);
 	Matrix& operator/=(const Matrix<T>& matrix);
 
-	friend Vector<T> operator*(const Matrix<T>& matrix,const Vector<T>& vect);
-	friend Matrix<T> operator*(const Matrix<T>& matrix1,const Matrix<T>& matrix2);
+	template <typename U>
+	friend Vector<U> operator*(const Matrix<U>& matrix,const Vector<U>& vect);
+
+	template <typename U>
+	friend Matrix<U> operator*(const Matrix<U>& matrix1,const Matrix<U>& matrix2);
 
 	
 	// solve linear systems
