@@ -1306,7 +1306,7 @@ void Image<T>::GaussianSmoothing(Image<T1>& image,float sigma,int fsize) const
 	// apply filtering
 	imfilter_hv(image,gFilter,fsize,gFilter,fsize);
 
-	delete gFilter;
+	delete[] gFilter;
 }
 
 //------------------------------------------------------------------------------------------
@@ -1333,7 +1333,7 @@ void Image<T>::GaussianSmoothing_transpose(Image<T1>& image,float sigma,int fsiz
 	// apply filtering
 	imfilter_hv_transpose(image,gFilter,fsize,gFilter,fsize);
 
-	delete gFilter;
+	delete[] gFilter;
 }
 
 
@@ -2372,8 +2372,8 @@ void Image<T>::BilateralFiltering(Image<T1>& other,int fsize,float filter_sigma,
 				result.data()[(i*imWidth+j)*other.nchannels()]=pBuffer[k]/totalWeight;
 		}
 	other.copyData(result);
-	delete pBuffer;
-	delete pSpatialWeight;
+	delete[] pBuffer;
+	delete[] pSpatialWeight;
 }
 
 
@@ -2430,8 +2430,8 @@ void  Image<T>::imBilateralFiltering(Image<T>& result,int fsize,float filter_sig
 				result.data()[offset0+k]=pBuffer[k]/totalWeight;
 
 		}
-	delete pBuffer;
-	delete pSpatialWeight;
+	delete[] pBuffer;
+	delete[] pSpatialWeight;
 	//return result;
 }
 

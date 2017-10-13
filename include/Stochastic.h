@@ -6,9 +6,9 @@
 #include "project.h"
 #include "memory.h"
 
-#define _Release_2DArray(X,i,length) for(i=0;i<length;i++) if(X[i]!=NULL) delete X[i]; delete []X
+#define _Release_2DArray(X,i,length) for(i=0;i<length;i++) if(X[i]!=NULL) delete[] X[i]; delete []X
 
-#ifndef _abs(x)
+#ifndef _abs
 #define _abs(x) (x>=0)?x:-x
 #endif
 
@@ -122,7 +122,7 @@ void CStochastic::sort(int Number,T* pData,int *pIndex,SortType m_SortType)
 		pIndex[i]=offset_extreme;
 		flag[offset_extreme]=1;
 	}
-	delete flag;
+	delete[] flag;
 }
 
 template <class T>
@@ -344,7 +344,7 @@ _CStochastic_KMeanClustering_InitializePartition:
 				pClusterMean[i][l]=pCenters[i][l];
 	// free buffer
 	for(i=0;i<NumClusters;i++)
-		delete pCenters[i];
+		delete[] pCenters[i];
 	delete []pCenters;
 }
 
@@ -404,7 +404,7 @@ void CStochastic::GaussianFiltering(T1* pSrcArray,T2* pDstArray,int NumPoints,in
 			}
 			pDstArray[i*nChannels+l]=temp;
 		}
-	delete pGaussian;
+	delete[] pGaussian;
 }
 
 #endif
