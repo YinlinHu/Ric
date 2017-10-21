@@ -235,6 +235,9 @@ int RIC::OverSegmentaion(FImage& img, IntImage& outLabels, const int spSize)
 // use the post-processing from DeepFlow (implemented in OpenCV)
 int RIC::VariationalRefine(FImage& img1, FImage& img2, FImage& u, FImage& v, FImage& outu, FImage& outv)
 {
+	(void)outu;
+	(void)outv;
+
 	int w = u.width();
 	int h = u.height();
 
@@ -511,7 +514,8 @@ float RIC::HypothesisEvaluation(float* inModel, int* matNodes, float* matDis, in
 		float tv = p[3] - p[1];
 		float wt = GetWeightFromDistance(matDis[k]);
 
-		if (pu != pu || pv != pv || OpticFlowIO::unknown_flow(tu, tv)) { // isnan()
+		if (std::isnan(pu) || std::isnan(pv) || OpticFlowIO::unknown_flow(tu, tv)) { // isnan()
+		//if (pu != pu || pv != pv || OpticFlowIO::unknown_flow(tu, tv)) { // isnan()
 			outInLier[k] = 0;
 			cost += wt*errTh;
 			continue;
@@ -796,14 +800,14 @@ void RIC::SuperpixelLayoutAnalysis(IntImage& labels, int labelCnt, FImage& outCe
 }
 
 // a border between two int (neighbor) is represented as a long
-static inline LONG64 Key(int i, int j)
+static inline int64_t Key(int i, int j)
 {
 	// swap: always i<j
 	if (i > j) { int t = i; i = j; j = t; };
-	return (LONG64)i + ((LONG64)j << 32);
+	return (int64_t)i + ((int64_t)j << 32);
 }
-static inline int KeyFirst(LONG64 i) { return int(i); }
-static inline int KeySecond(LONG64 i) { return int(i >> 32); }
+static inline int KeyFirst(int64_t i) { return int(i); }
+static inline int KeySecond(int64_t i) { return int(i >> 32); }
 
 void RIC::MatchingNeighborConstruction(FImage& disMap, IntImage& labels, int labelCnt, IntImage& outNeighbor, FImage& outNeighborDis)
 {
@@ -835,13 +839,13 @@ void RIC::MatchingNeighborConstruction(FImage& disMap, IntImage& labels, int lab
 			int l2 = lab[idx - w];
 
 			if (l0 != l1){
-				LONG64 k = Key(l0, l1);
+				int64_t k = Key(l0, l1);
 				double v = dis[idx] + dis[idx - 1];
 				H.Push(&v, (double*)&k, 1);
 			}
 
 			if (l0 != l2){
-				LONG64 k = Key(l0, l2);
+				int64_t k = Key(l0, l2);
 				double v = dis[idx] + dis[idx - w];
 				H.Push(&v, (double*)&k, 1);
 			}
@@ -849,7 +853,7 @@ void RIC::MatchingNeighborConstruction(FImage& disMap, IntImage& labels, int lab
 	}
 
 	while (H.Size()){
-		LONG64 newK, currK;
+		int64_t newK, currK;
 
 		float minDis = H.Top((double*)&currK);
 		int l0 = KeyFirst(currK);
