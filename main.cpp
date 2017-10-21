@@ -47,6 +47,16 @@ void GetCostMap(char* imgName, FImage& outCostMap)
 	}
 }
 
+void ReadEdges(char* fileName, FImage& edge)
+{
+	int w = edge.width();
+	int h = edge.height();
+	FILE* fp = fopen(fileName, "rb");
+	int size = fread(edge.pData, sizeof(float), w*h, fp);
+	assert(size == w*h);
+	fclose(fp);
+}
+
 int main(int argc, char** argv)
 {
 	if (argc < 4){
@@ -60,6 +70,10 @@ int main(int argc, char** argv)
 	img1.imread(argv[1]);
 	GetCostMap(argv[1], costMap);
 	img2.imread(argv[2]);
+
+// 	costMap.allocate(img1.width(), img1.height(), 1);
+// 	ReadEdges(argv[3], costMap);
+
 	ReadMatches(argv[3], matches);
 
 	int w = img1.width();
@@ -71,21 +85,22 @@ int main(int argc, char** argv)
 
 	RIC ric;
 	FImage u, v;
+	ric.SetSuperpixelSize(100);
 	ric.Interpolate(img1, img2, costMap, matches, u, v);
 
 	// save output flow
 	char baseName[256], outName[256];
 	
 	// get base Name, not support multi-char language, like CJK
-	strcpy(baseName, argv[1]);
+	strcpy(baseName, argv[3]);
 	char* dot = strrchr(baseName, '.');
 	if (dot != NULL) dot[0] = '\0';
 
 	// save the flow and the visualization image
 	strcpy(outName, baseName);
-	strcat(outName, "_ric.flo");
+	strcat(outName, ".ric.flo");
 	OpticFlowIO::WriteFlowFile(u.pData, v.pData, w, h, outName);
 	strcpy(outName, baseName);
-	strcat(outName, "_ric.flo.png");
+	strcat(outName, ".ric.png");
 	OpticFlowIO::SaveFlowAsImage(outName, u.pData, v.pData, w, h);
 }

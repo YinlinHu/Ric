@@ -16,6 +16,7 @@ RIC::RIC()
 	_model_iter = 4;
 	_refine_models = 1;
 	_cost_suffix = 0.001;
+	_maxFlow = 250;
 }
 
 RIC::~RIC()
@@ -116,10 +117,29 @@ void RIC::Interpolate(FImage& img1, FImage& img2, FImage& costMap, FImage& input
 	/************************************************************************/
 	// affine fit for every seed
 
-	FImage FitModels(6, spCnt); // models for each superpixel
+	FImage transModels(6, spCnt); // models for each superpixel
+	FImage fitModels(6, spCnt);
+	//init models (translation model)
+	float rawModel[6] = { 1, 0, 0, 0, 1, 0 };
+	for (int i = 0; i < spCnt; i++){
+		int matId = supportMatchIds[i*supportCnt + 0]; // the nearest support matching
+		float* p = inputMatches.rowPtr(matId);
+		float u = p[2] - p[0];
+		float v = p[3] - p[1];
 
-	// propagation
-	PropagateModels(spCnt, spNN, supportMatchIds, supportMatchDis, supportCnt, inputMatches, FitModels);
+		float* pModel = transModels.rowPtr(i);
+		memcpy(pModel, rawModel, 6 * sizeof(float));
+#if 0
+		pModel[2] = rand() % (2 * MAX_DISPLACEMENT) - MAX_DISPLACEMENT;
+		pModel[5] = rand() % (2 * MAX_DISPLACEMENT) - MAX_DISPLACEMENT;
+#else
+		pModel[2] = u;
+		pModel[5] = v;
+#endif
+		memcpy(fitModels.rowPtr(i), pModel, 6 * sizeof(float));
+	}
+
+	PropagateModels(spCnt, spNN, supportMatchIds, supportMatchDis, supportCnt, inputMatches, fitModels);
 
 	t.toc("Fitting: ");
 
@@ -129,7 +149,7 @@ void RIC::Interpolate(FImage& img1, FImage& img2, FImage& costMap, FImage& input
 	outU.allocate(w, h);
 	outV.allocate(w, h);
 	for (int i = 0; i < spCnt; i++){
-		float* pModel = FitModels.rowPtr(i);
+		float* pModel = fitModels.rowPtr(i);
 		int* pixelItems = spItems.rowPtr(i);
 		int maxPixelCnt = spItems.width();
 		for (int k = 0; k < maxPixelCnt; k++){
@@ -143,8 +163,13 @@ void RIC::Interpolate(FImage& img1, FImage& img2, FImage& costMap, FImage& input
 			int idx = y*w + x;
 			outU[idx] = fx - x;
 			outV[idx] = fy - y;
-			if (OpticFlowIO::unknown_flow(fx - x, fy - y)){
-				//printf("%d: <%f, %f>\n", i, fx - x, fy - y);
+			if (abs(fx - x) > _maxFlow || abs(fy - y) > _maxFlow){
+				// use the translational model directly
+				pModel = transModels.rowPtr(i);
+				fx = pModel[0] * x + pModel[1] * y + pModel[2];
+				fy = pModel[3] * x + pModel[4] * y + pModel[5];
+				outU[idx] = fx - x;
+				outV[idx] = fy - y;
 			}
 		}
 	}
@@ -154,9 +179,11 @@ void RIC::Interpolate(FImage& img1, FImage& img2, FImage& costMap, FImage& input
 	/************************************************************************/
 	/* Variational Refinement                                               */
 	/************************************************************************/
+#if 1
 	VariationalRefine(img1, img2, outU, outV, outU, outV);
 	t.toc("Variational: ");
-	
+#endif
+
 	delete[] srcMatchIds;
 	delete[] supportMatchIds;
 	delete[] supportMatchDis;
@@ -514,26 +541,6 @@ int RIC::PropagateModels(int spCnt, IntImage& spNN, int* supportMatchIds, float*
 	int* tmpInlierFlag = new int[supportCnt];
 	float tmpModel[6];
 
-	//init models (translation model)
-	float rawModel[6] = { 1, 0, 0, 0, 1, 0 };
-	for (int i = 0; i < spCnt; i++){
-		int matId = supportMatchIds[i*supportCnt + 0]; // the nearest support matching
-		float* p = inputMatches.rowPtr(matId);
-		float u = p[2] - p[0];
-		float v = p[3] - p[1];
-
-		float* pModel = outModels.rowPtr(i);
-		memcpy(pModel, rawModel, 6 * sizeof(float));
-#if 0
-		pModel[2] = rand() % (2 * MAX_DISPLACEMENT) - MAX_DISPLACEMENT;
-		pModel[5] = rand() % (2 * MAX_DISPLACEMENT) - MAX_DISPLACEMENT;
-#else
-		pModel[2] = u;
-		pModel[5] = v;
-#endif
-	}
-	// return 0;
-
 	// prepare data
 	float* bestCost = new float[spCnt];
 #ifdef WITH_OPENMP
@@ -620,7 +627,7 @@ int RIC::PropagateModels(int spCnt, IntImage& spNN, int* supportMatchIds, float*
 #ifdef WITH_OPENMP
 #pragma omp parallel for num_threads(8)
 #endif
-		int minPtCnt = 15;
+		int minPtCnt = 30;
 		for (int i = 0; i < spCnt; i++){
 			Vector<float> pt1(supportCnt * 2), pt2(supportCnt * 2), wt(supportCnt);
 			Vector<float> fitModel;

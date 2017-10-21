@@ -50,6 +50,7 @@ private:
 	int _model_iter;
 	int _refine_models;
 	float _cost_suffix;
+	float _maxFlow;
 };
 
 #endif
