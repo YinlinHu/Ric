@@ -889,7 +889,7 @@ void RIC::MatchingNeighborConstruction(FImage& disMap, IntImage& labels, int lab
 		currK = newK;
 	}
 
-	delete neighborCount;
+    delete[] neighborCount;
 }
 
 void RIC::FindSupportMatches(int* srcIds, int srcCnt, int supportCnt, IntImage& matNN, FImage& matNNDis, int* outSupportIds, float* outSupportDis)
