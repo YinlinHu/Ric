@@ -106,10 +106,15 @@ int main(int argc, char** argv)
 	if (dot != NULL) dot[0] = '\0';
 
 	// save the flow and the visualization image
-	strcpy(outName, baseName);
-	strcat(outName, ".ric.flo");
-	OpticFlowIO::WriteFlowFile(u.pData, v.pData, w, h, outName);
-	strcpy(outName, baseName);
-	strcat(outName, ".ric.png");
-	OpticFlowIO::SaveFlowAsImage(outName, u.pData, v.pData, w, h);
+    if (argc < 5) {
+        strcpy(outName, baseName);
+        strcat(outName, ".ric.flo");
+        OpticFlowIO::WriteFlowFile(u.pData, v.pData, w, h, outName);
+        strcpy(outName, baseName);
+        strcat(outName, ".ric.png");
+        OpticFlowIO::SaveFlowAsImage(outName, u.pData, v.pData, w, h);
+    }
+    else {
+        OpticFlowIO::WriteFlowFile(u.pData, v.pData, w, h, argv[4]);
+    }
 }
