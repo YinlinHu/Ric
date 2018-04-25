@@ -3,9 +3,9 @@ Code for
 
 《Robust Interpolation of Correspondences for Large Displacement Optical Flow》 CVPR 2017
 
-The directory "win32" saves binaries for windows platform.
+Although the code here is much faster than the paper version, it has worse performance compared with the raw paper version. For the compatibility of windows platform, we use the default variational post-processing of OpenCV (3.1.0+), rather than the EpicFlow post-processing as the paper version do. If you want to reproduce the paper result accurately, please use the post-processing of EpicFlow (Only Unix-like platforms).
 
-For Linux platform, I think it can be compiled after only some simple configuration. (It depends on OpenCV 3.1.0+).
+Here is only a demonstration implementation, and compiled on windows. For Unix-like platforms, some simple compiler configurations are needed. The directory "win32" saves binaries for windows platform.
 
-Note that, the code here is much faster than that when the paper accepted.
-
+Yinlin
+2018.04.25
