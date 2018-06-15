@@ -454,7 +454,7 @@ void ImageProcessing::Medianfiltering(const T1* pSrcImage, T2* pDstImage, int wi
 				// 				for(int kk=0; kk<regionSize; kk++){
 				// 					printf("%f ", pTmpSrc[kk]);
 				// 				}
-                std::sort(pTmpSrc, pTmpSrc + regionSize);
+				std::sort(pTmpSrc, pTmpSrc + regionSize);
 				// debug
 				// 				printf("\n");
 				// 				for(int kk=0; kk<regionSize; kk++){
