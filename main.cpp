@@ -37,7 +37,16 @@ void GetCostMap(char* imgName, FImage& outCostMap)
 	int borderSize = 10;
 	cv::copyMakeBorder(fImg1, fImg1, borderSize, borderSize, borderSize, borderSize, cv::BORDER_REPLICATE);
 	cv::Mat edges(fImg1.size(), fImg1.type());
-	cv::Ptr<cv::ximgproc::StructuredEdgeDetection> sEdge = cv::ximgproc::createStructuredEdgeDetection("./model.yml.gz");
+
+    std::string src_dir = ".";
+#ifdef __FILE__
+    src_dir = __FILE__;
+    size_t pos = src_dir.find_last_of('/');
+    if (pos != std::string::npos) {
+        src_dir = src_dir.substr(0, pos) + "/win32/";
+    }
+#endif // __FILE__
+    cv::Ptr<cv::ximgproc::StructuredEdgeDetection> sEdge = cv::ximgproc::createStructuredEdgeDetection(src_dir + "/model.yml.gz");
 	sEdge->detectEdges(fImg1, edges);
 	// save result to FImage
 	for (int i = 0; i < h; i++){
@@ -97,10 +106,15 @@ int main(int argc, char** argv)
 	if (dot != NULL) dot[0] = '\0';
 
 	// save the flow and the visualization image
-	strcpy(outName, baseName);
-	strcat(outName, ".ric.flo");
-	OpticFlowIO::WriteFlowFile(u.pData, v.pData, w, h, outName);
-	strcpy(outName, baseName);
-	strcat(outName, ".ric.png");
-	OpticFlowIO::SaveFlowAsImage(outName, u.pData, v.pData, w, h);
+    if (argc < 5) {
+        strcpy(outName, baseName);
+        strcat(outName, ".ric.flo");
+        OpticFlowIO::WriteFlowFile(u.pData, v.pData, w, h, outName);
+        strcpy(outName, baseName);
+        strcat(outName, ".ric.png");
+        OpticFlowIO::SaveFlowAsImage(outName, u.pData, v.pData, w, h);
+    }
+    else {
+        OpticFlowIO::WriteFlowFile(u.pData, v.pData, w, h, argv[4]);
+    }
 }

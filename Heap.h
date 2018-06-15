@@ -53,10 +53,10 @@ template <class T>
 CHeap<T>::~CHeap()
 {
 	if (m_index){
-		delete m_index;
+        delete[] m_index;
 	}
 	if (m_weight){
-		delete m_weight;
+        delete[] m_weight;
 	}
 }
 
