@@ -1,5 +1,5 @@
 
-**This repository has been merged into [ximgproc component of OpenCV](https://github.com/opencv/opencv_contrib/blob/master/modules/ximgproc/src/sparse_match_interpolators.cpp)**
+**This repository has been merged into [ximgproc component of OpenCV](https://github.com/opencv/opencv_contrib/blob/master/modules/ximgproc/include/opencv2/ximgproc/sparse_match_interpolator.hpp)** (Thanks to Tobias Senst)
 
 Code for《Robust Interpolation of Correspondences for Large Displacement Optical Flow》 CVPR 2017
 
